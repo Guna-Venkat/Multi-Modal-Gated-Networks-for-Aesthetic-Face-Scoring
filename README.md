@@ -53,10 +53,18 @@ By plotting the distribution of the $\beta$ (Geometry) gate, we observed that:
 ### 5.2 Transformer Attention (Interpretability)
 We extracted cross-attention weights from the best-performing transformer model, **M7 (Cross-Attention Fusion)**. For each test image, the model computes a weight per facial landmark (0–467) indicating how much that landmark contributed to the final beauty score.
 
+To provide a comprehensive view of model interpretability, we visualised both the **intensity distribution** across landmark indices (Figure 3a) and the **spatial mapping** onto the facial structure (Figure 3b).
+
 <p align="center">
-  <img src="results/m7_attention_spatial.png" width="500" alt="Figure 3: M7 Spatial Attention Map">
+  <img src="results/m7_attention_distribution.png" width="800" alt="Figure 3a: Attention Distribution">
   <br>
-  <em>Figure 3: M7 Spatial Attention Map mapping feature importance back onto the face. Brighter points (Plasma scale) indicate higher attention weights.</em>
+  <em>Figure 3a: Cross-attention distribution across 468 landmark indices. Peaks correspond to specific facial landmarks with above-average contribution.</em>
+</p>
+
+<p align="center">
+  <img src="results/m7_attention_spatial.png" width="500" alt="Figure 3b: Spatial Attention Map">
+  <br>
+  <em>Figure 3b: Spatial Attention Map mapping these weights back onto a Procrustes-aligned facial mesh. Brighter points (Plasma scale) indicate higher attention weights.</em>
 </p>
 
 As shown in Figure 3, the attention weights are spatially concentrated on key facial regions:

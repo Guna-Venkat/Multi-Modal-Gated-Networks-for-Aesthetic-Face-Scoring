@@ -106,81 +106,61 @@ def plot_attention_distribution():
     out_path = os.path.join(C.RESULTS_DIR, "m7_attention_distribution.png")
     plt.tight_layout()
     plt.savefig(out_path)
-    print(f"Attention distribution plot saved to {out_path}")
+    print(f"Attention distribution saved to {out_path}")
 
 
 def plot_spatial_attention():
     """
-    Map M7 attention weights onto the 2D facial landmarks to create a
-    spatial heatmap of where the model "looks".
+    Map M7 attention weights onto the Procrustes-aligned 3D facial landmarks
+    to create a recognizable spatial map of where the model "looks".
     """
-    # ------------------------------------------------------------------
-    # 1. Load required data
-    # ------------------------------------------------------------------
+    # 1. Load Data
     attn_path = os.path.join(C.CHECKPOINT_DIR, "m7_transformer_heatmaps.npy")
-    land_path = os.path.join(C.CACHE_DIR, "norm_2d.npy")
-
+    # Using aligned_3d because it preserves the actual face structure perfectly
+    land_path = os.path.join(C.CACHE_DIR, "aligned_3d.npy")
+    
     if not os.path.exists(attn_path) or not os.path.exists(land_path):
-        print("Missing data for spatial mapping (attention or landmarks).")
+        print("Missing data for spatial mapping (attention or aligned landmarks).")
         return
 
-    attn_data = np.load(attn_path)                       # shape: (N, 468) or (N, 468, 196)
-    land_raw = np.load(land_path, allow_pickle=True)
+    attn_data = np.load(attn_path)
+    land_dict = np.load(land_path, allow_pickle=True).item()
 
-    # ------------------------------------------------------------------
-    # 2. Extract first sample's landmarks
-    # ------------------------------------------------------------------
-    if isinstance(land_raw.item(), dict):
-        first_key = list(land_raw.item().keys())[0] # Added [0] to get the actual key string
-        sample_land = land_raw.item()[first_key]
-    else:
-        sample_land = land_raw[0]
-    
-    # Reshape landmarks to 2 columns (X, Y). 
-    # If it was 702 elements, it will become (351, 2).
-    sample_land = np.array(sample_land).reshape(-1, 2)
-
-    # ------------------------------------------------------------------
-    # 3. Extract first sample's attention and reduce to per-landmark values
-    # ------------------------------------------------------------------
-    # If attn_data is the whole file, take the first sample [0]
-    sample_attn = attn_data[0] if attn_data.ndim > 1 else attn_data
-
-    # If attention is 2D (landmarks × patches), collapse over patches
+    # 2. Extract first sample
+    # Attention: (N, 468) or (N, 468, patches)
+    sample_attn = attn_data[0]
     if sample_attn.ndim == 2:
-        sample_attn = sample_attn.mean(axis=1)
-        print("Note: Aggregated cross‑attention over patches using mean.")
+        sample_attn = sample_attn.mean(axis=1) # Mean over patches
     
-    sample_attn = sample_attn.flatten()
-
-    # ------------------------------------------------------------------
-    # MATCHING LOGIC: Ensure sample_attn and sample_land have same length
-    # ------------------------------------------------------------------
+    # Landmarks: First available in the dict, reshaped to (468, 3)
+    first_fn = list(land_dict.keys())[0]
+    sample_land = land_dict[first_fn].reshape(-1, 3)
+    
+    # Align lengths
     min_len = min(len(sample_attn), len(sample_land))
     sample_attn = sample_attn[:min_len]
     sample_land = sample_land[:min_len]
-    print(f"Aligning data: using first {min_len} points for plotting.")
 
-    # ------------------------------------------------------------------
-    # 4. Create 2D scatter plot with attention as colour
-    # ------------------------------------------------------------------
-    plt.figure(figsize=(9, 10))
-    plt.gca().set_facecolor('#1c1c1c')
-
+    # 3. Visualization
+    plt.figure(figsize=(8, 10))
+    plt.gca().set_facecolor('#1c1c1c') # Dark theme
+    
+    # Plot spatial map (X, Y)
+    # Note: For procrustes-aligned landmarks, we might not need to flip Y, 
+    # but let's check orientation. Usually (x, -y) is safe for image-originated coords.
     scatter = plt.scatter(sample_land[:, 0], -sample_land[:, 1],
-                          c=sample_attn, cmap='plasma', s=35, alpha=0.9,
-                          edgecolors='white', linewidth=0.2)
-
-    plt.colorbar(scatter, label='Attention Weight', shrink=0.8)
-    plt.title("M7 Spatial Attention Map: Feature Importance", fontsize=15, pad=20)
+                         c=sample_attn, cmap='plasma', s=45, alpha=0.9,
+                         edgecolors='white', linewidth=0.1)
+    
+    plt.colorbar(scatter, label='Attention Weight', shrink=0.7)
+    plt.title("M7 Spatial Attention Map (Facial Mesh)", fontsize=15, pad=20)
     plt.axis('equal')
     plt.axis('off')
-
+    
     out_path = os.path.join(C.RESULTS_DIR, "m7_attention_spatial.png")
     plt.tight_layout()
     plt.savefig(out_path)
-    print(f"Spatial attention map saved to {out_path}")
-
+    print(f"Spatial attention map (Face Mesh) saved to {out_path}")
 
 if __name__ == "__main__":
     generate_report_plots()
