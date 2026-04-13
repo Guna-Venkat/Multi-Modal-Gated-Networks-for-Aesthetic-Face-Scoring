@@ -1,9 +1,18 @@
 """
 phase2_m1_cnn.py
 ────────────────
-Phase 2 – Baseline Full-Image CNN  (Days 4–5)
+Phase 2: Training the Appearance-based Texture Model (M1).
 
-Model M1: ResNet-18 pretrained → beauty score regressor
+Model: 
+    M1ImageCNN (ResNet-18)
+    
+Focus: 
+    Analyzing the skin quality, symmetry, and color features of the face 
+    to predict aesthetic beauty scores.
+    
+Usage:
+    Import `run_m1` and provide training/testing dataframes.
+
   • Input : RGB image 224×224
   • Output: scalar [0,1]  (de-normalise: score = pred * 4 + 1)
   • Loss  : MSE

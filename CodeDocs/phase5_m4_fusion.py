@@ -1,7 +1,18 @@
 """
 phase5_m4_fusion.py
 ───────────────────
-Phase 5 – M4: Adaptive Fusion / Gating Network  (Days 10–14)
+Phase 5: Training the Adaptive Gated Fusion Model (M4).
+
+Model:
+    M4AdaptiveFusion (Multimodal)
+
+Methodology:
+    This phase implements the gating mechanism that calculates content-dependent
+    trust weights (alpha and beta). It combines the texture features from M1
+    with the geometric features from M2/M3 using a softmax-based gating network.
+    
+    Entropy regularization is applied to prevent the gating network from 
+    degenerating into a simple average.
 
 Architecture:
   ŷ = α(I)·y_img(I)  +  β(I)·y_land(L)

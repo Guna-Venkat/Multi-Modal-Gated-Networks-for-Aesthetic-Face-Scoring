@@ -14,6 +14,12 @@ def compute_metrics(preds, targets):
     rmse = np.sqrt(np.mean((preds_d - targets_d) ** 2))
     return r, mae, rmse
 
+"""
+phase7_final_results_collector.py
+─────────────────────────────────
+Consolidates training logs and evaluation CSVs into a single master summary.
+Used for generating the final comprehensive performance table in the report.
+"""
 def collect_all_metrics():
     # 1. Load Ground Truth
     test_csv = os.path.join(C.CACHE_DIR, "test_split.csv")

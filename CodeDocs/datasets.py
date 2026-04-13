@@ -1,11 +1,18 @@
 """
 datasets.py
 ───────────
-PyTorch Dataset classes for all four models.
+PyTorch Dataset implementations for the Facial Beauty Prediction pipeline.
 
-  FaceImageDataset    – full RGB image + label          → M1
-  FaceLandmarkDataset – pre-computed landmark vector + label → M2, M3
-  FaceFusionDataset   – image + landmark vector + label  → M4
+Coordinates the loading of raw images and pre-calculated facial landmarks 
+from the SCUT-FBP5500 dataset.
+
+Datasets Provided:
+1. FaceImageDataset: Returns (image, score) for the texture-only CNN (M1).
+2. FaceLandmarkDataset: Returns (landmark_vector, score) for the geometry-only MLPs (M2, M3).
+3. FaceFusionDataset: Returns (image, landmark_vector, score) for the Adaptive Fusion model (M4).
+
+Key Operation:
+- All datasets normalize the 1-5 beauty scores into a [0, 1] range.
 """
 
 import os
@@ -20,9 +27,18 @@ from torchvision import transforms
 import config as C
 
 
-# ─── Standard ImageNet transforms ─────────────────────────────────────────────
+# ─── Data Augmentation & Preprocessing ────────────────────────────────────────
 
 def get_transforms(train: bool):
+    """
+    Define image transformation pipeline.
+    
+    Args:
+        train (bool): If True, applies random augmentations for training.
+    
+    Returns:
+        torchvision.transforms.Compose: The transformation pipeline.
+    """
     if train:
         return transforms.Compose([
             transforms.Resize((C.IMG_SIZE, C.IMG_SIZE)),
@@ -43,18 +59,24 @@ def get_transforms(train: bool):
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
-#  M1 Dataset – full image
+#  M1 Dataset – Full RGB Image
 # ═══════════════════════════════════════════════════════════════════════════════
 
 class FaceImageDataset(Dataset):
     """
-    Returns (image_tensor, score) for M1.
-    Normalises score to [0,1] (original range 1-5).
+    Dataset for Model M1. Handles raw RGB images.
+    Normalizes beauty scores from [1, 5] to [0, 1].
     """
     def __init__(self, df: pd.DataFrame, train: bool = True):
+        """
+        Args:
+            df (pd.DataFrame): DataFrame containing 'filepath' and 'score'.
+            train (bool): Toggle for training augmentations.
+        """
         self.df        = df.reset_index(drop=True)
         self.transform = get_transforms(train)
-        # Normalise score: (s - 1) / 4  → [0, 1]
+        
+        # Min-Max normalization of labels: (s - 1) / 4  → [0, 1]
         self.scores = torch.tensor(
             ((df["score"].values - 1.0) / 4.0), dtype=torch.float32
         )
@@ -71,24 +93,29 @@ class FaceImageDataset(Dataset):
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
-#  M2 / M3 Dataset – landmark vector only
+#  M2 / M3 Dataset – Landmark Vectors
 # ═══════════════════════════════════════════════════════════════════════════════
 
 class FaceLandmarkDataset(Dataset):
     """
-    Returns (landmark_vector [1404], score) for M2 (or M3).
-    `landmarks_dict` maps filename → np.ndarray [1404].
+    Dataset for Models M2 and M3. Uses flattened landmark vectors.
     """
     def __init__(self, df: pd.DataFrame, landmarks_dict: dict):
-        # Keep only rows present in landmarks_dict
+        """
+        Args:
+            df (pd.DataFrame): Dataset partition.
+            landmarks_dict (dict): Map of {filename: landmark_flattened_array}.
+        """
+        # Intersection of available landmarks and the split dataframe
         mask   = df["filename"].isin(landmarks_dict)
         self.df = df[mask].reset_index(drop=True)
         self.landmarks_dict = landmarks_dict
+        
         self.scores = torch.tensor(
             ((self.df["score"].values - 1.0) / 4.0), dtype=torch.float32
         )
         if C.VERBOSE:
-            print(f"[LandmarkDataset] kept {len(self.df)} / {len(df)} samples")
+            print(f"[LandmarkDataset] initialized with {len(self.df)} samples")
 
     def __len__(self):
         return len(self.df)
@@ -101,24 +128,31 @@ class FaceLandmarkDataset(Dataset):
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
-#  M4 Dataset – image + landmark
+#  M4 Dataset – Image + Landmark Fusion
 # ═══════════════════════════════════════════════════════════════════════════════
 
 class FaceFusionDataset(Dataset):
     """
-    Returns (image_tensor, landmark_vector [1404], score) for M4.
-    Requires both a filepath and an entry in landmarks_dict.
+    Multimodal Dataset for Model M4. 
+    Returns pairs of (image, landmarks) for the Adaptive Fusion branch.
     """
     def __init__(self, df: pd.DataFrame, landmarks_dict: dict, train: bool = True):
+        """
+        Args:
+            df (pd.DataFrame): Dataset partition.
+            landmarks_dict (dict): Map of {filename: landmark_flattened_array}.
+            train (bool): Toggle for training augmentations on the image branch.
+        """
         mask    = df["filename"].isin(landmarks_dict)
         self.df = df[mask].reset_index(drop=True)
         self.landmarks_dict = landmarks_dict
         self.transform = get_transforms(train)
+        
         self.scores = torch.tensor(
             ((self.df["score"].values - 1.0) / 4.0), dtype=torch.float32
         )
         if C.VERBOSE:
-            print(f"[FusionDataset] kept {len(self.df)} / {len(df)} samples")
+            print(f"[FusionDataset] initialized with {len(self.df)} samples")
 
     def __len__(self):
         return len(self.df)
@@ -132,14 +166,13 @@ class FaceFusionDataset(Dataset):
         return img, lm, lbl
 
 
-# ═══════════════════════════════════════════════════════════════════════════════
-#  DataLoader helpers
-# ═══════════════════════════════════════════════════════════════════════════════
+# ─── DataLoader Factory Functions ──────────────────────────────────────────────
 
 def get_image_loaders(train_df, test_df):
-    """M1 dataloaders."""
+    """Construct DataLoader pair for the M1 CNN model."""
     train_ds = FaceImageDataset(train_df, train=True)
     test_ds  = FaceImageDataset(test_df,  train=False)
+    
     train_dl = DataLoader(train_ds, batch_size=C.BATCH_SIZE,
                           shuffle=True,  num_workers=C.NUM_WORKERS,
                           pin_memory=True)

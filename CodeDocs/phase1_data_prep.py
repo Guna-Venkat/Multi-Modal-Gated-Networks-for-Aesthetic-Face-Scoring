@@ -1,17 +1,19 @@
 """
 phase1_data_prep.py
 ───────────────────
-Phase 1 – Setup & Data Preparation  (Days 1–3)
+Phase 1: Setup, Data Cleaning, and Feature Engineering.
 
-Steps:
-  1. Load image paths + mean beauty scores from SCUT-FBP5500
-  2. Create train/test split (80/20, no identity overlap)
-  3. Extract 2D & 3D landmarks via MediaPipe Face Mesh  (cached as .npy)
-  4. Anchor-based 2D normalisation  (M2)
-  5. Procrustes alignment of 3D landmarks  (M3)  [optional]
+This phase handles the initial dataset ingestion and prepares the two primary
+data representations used throughout the project:
+1. RGB Image Crops: Used by M1 (CNN) and M4 (Fusion).
+2. Facial Landmarks: Extracted via MediaPipe, then normalized using 
+   anchor-based 2D coordinates (M2) or Procrustes-aligned 3D meshes (M3).
 
-Run:
-    python phase1_data_prep.py
+Workflow:
+    1. Load Metadata: Average rater scores from SCUT-FBP5500.
+    2. Data Splitting: Stratified 80/20 train/test split.
+    3. MediaPipe Extraction: Detect 468 facial landmarks per image.
+    4. Normalization: Center and scale landmarks to be invariant to head pose.
 """
 
 import os, sys, json, pickle
@@ -232,30 +234,38 @@ _LEFT_EYE_IDX  = [33, 133, 160, 159, 158, 144, 145, 153]
 _RIGHT_EYE_IDX = [362, 263, 387, 386, 385, 373, 374, 380]
 _NOSE_TIP_IDX  = 4
 
-
-def anchor_normalise_2d(lm2d: np.ndarray) -> np.ndarray:
+def anchor_normalise_2d(lm: np.ndarray) -> np.ndarray:
     """
-    Anchor-based normalisation from the project plan (Section 2.1, step 7).
+    Normalizes 2D facial landmarks to be invariant to absolute image position and scale.
     
-    p1 = left eye centre,  p2 = right eye centre,  p3 = nose tip
-    d  = ||p1 - p2||_2  (inter-ocular distance)
+    Mathematical Approach:
+    1. Define three stable anchors: Left Eye Center (p1), Right Eye Center (p2), and Nose Tip (p3).
+    2. Centers are calculated as the mean of the eye contour landmarks.
+    3. Calculate inter-ocular distance (d) = ||p1 - p2||.
+    4. For every landmark pk, its new feature representation is the triplet:
+       p̃k = ( ||pk - p1||/d, ||pk - p2||/d, ||pk - p3||/d )
     
-    For each landmark pk:
-        p̃k = ( ||pk-p1||/d,  ||pk-p2||/d,  ||pk-p3||/d )
-
-    Returns flattened vector  X_2d  of shape [468 * 3] = [1404].
-    (Note: the plan says 3×468 = 1404 for the MLP input)
+    This results in a 1404-dimensional vector (468 points * 3 distances) that describes 
+    facial proportions independently of head pose or camera distance.
+    
+    Args:
+        lm (np.ndarray): raw [468, 2] image-space coordinates.
+    Returns:
+        np.ndarray: normalized [1404] geometric feature vector.
     """
-    p1 = lm2d[_LEFT_EYE_IDX].mean(axis=0)    # [2]
-    p2 = lm2d[_RIGHT_EYE_IDX].mean(axis=0)   # [2]
-    p3 = lm2d[_NOSE_TIP_IDX]                  # [2]
+    p1 = lm[_LEFT_EYE_IDX].mean(axis=0)    # [2]
+    p2 = lm[_RIGHT_EYE_IDX].mean(axis=0)   # [2]
+    p3 = lm[_NOSE_TIP_IDX]                  # [2]
+    
+    # Inter-ocular distance used for scale invariance
     d  = np.linalg.norm(p1 - p2) + 1e-8
 
+    # Vectorized distance calculation to all three anchors
     dists = np.stack([
-        np.linalg.norm(lm2d - p1, axis=1) / d,   # [468]
-        np.linalg.norm(lm2d - p2, axis=1) / d,
-        np.linalg.norm(lm2d - p3, axis=1) / d,
-    ], axis=1)   # [468, 3]
+        np.linalg.norm(lm - p1, axis=1) / d,   # distances to left eye
+        np.linalg.norm(lm - p2, axis=1) / d,   # distances to right eye
+        np.linalg.norm(lm - p3, axis=1) / d,   # distances to nose
+    ], axis=1)   # shape: [468, 3]
 
     return dists.flatten().astype(np.float32)    # [1404]
 
@@ -279,6 +289,13 @@ def procrustes_align(X: np.ndarray, Y: np.ndarray):
     """
     Align source X [N,3] to target Y [N,3] via Procrustes (scale+rotation+translation).
     Solves:  min_{s,R,t}  ||s*R*X + t - Y||^2_F
+
+    Mathematical approach:
+    1. Centering: Subtract the centroid (mean) from both shapes to remove translation.
+    2. Scaling: Normalize both shapes by their Frobenius norm (root sum of squares).
+    3. Rotation: Use Singular Value Decomposition (SVD) on the covariance matrix 
+       A = X0^T * Y0 to find the optimal rotation matrix R.
+    4. Reflection: Ensure det(R) = 1 to avoid improper rotations (reflections).
 
     Returns:
         X_aligned : [N,3]  aligned source

@@ -1,9 +1,18 @@
 """
-transformer_experiments.py
-──────────────────────────
-Experimental Phase – Transformer Architectures
+phase6_transformer_experiments.py
+─────────────────────────────────
+Advanced Phase: Transformer-based Aesthetic Scoring (M5, M6, M7).
 
-This module implements four transformer‑based models for facial beauty prediction:
+Models:
+    M5: ViT-B/16 (Patch-only) - Base Vision Transformer.
+    M6: ViT + Geometry concatenation.
+    M7: Cross-Attention Fusion - Uses a Transformer decoder to let 
+        geometric landmarks "attend" to specific image patches.
+
+Key Features:
+    - Implementation of Cross-Attention between texture and geometry.
+    - Interpretability: Extraction of attention weights to identify 
+      which facial regions are most influential for the model's decision.
 
 M5_ViT: 
   - Freezes a pre‑trained ViT-B/16 backbone and trains a regression head on top.

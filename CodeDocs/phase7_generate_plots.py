@@ -1,15 +1,14 @@
 """
 phase7_generate_plots.py
 ────────────────────────
-Generates all result figures for the paper:
+Final Phase: Scientific Visualization and Interpretability.
 
-1. Bar chart comparing model performance (Pearson ρ)
-2. Histogram of gate weights β (M4)
-3. 1D line plot of M7 cross‑attention distribution
-4. 2D spatial attention map overlaid on facial landmarks
-
-Usage:
-    python CodeDocs/phase7_generate_plots.py
+This script generates all figures used in the final project report, including:
+1. Performance Comparison (Figure 1): Bar chart of Pearson correlation across all models.
+2. Gating Distribution (Figure 2): Distribution of trust weights (alpha/beta) in M4.
+3. Attention Analysis (Figure 3a): Distribution of M7 cross-attention weights.
+4. Spatial Attention Map (Figure 3b): Overlays M7 attention onto a 3D facial mesh to 
+   identify which anatomical features (eyes, nose, jaw) the model prioritizes.
 """
 
 import os

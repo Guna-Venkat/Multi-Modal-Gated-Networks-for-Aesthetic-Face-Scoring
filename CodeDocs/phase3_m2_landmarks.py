@@ -1,13 +1,15 @@
 """
-phase3_m2_landmarks.py  &  phase4_m3_3d.py  (combined)
-────────────────────────────────────────────────────────
-Phase 3 – M2: 2D Landmarks + Anchor Normalisation + MLP   (Days 6–7)
-Phase 4 – M3: 3D Landmarks + Procrustes + MLP             (Days 8–9)  [optional]
+phase3_m2_landmarks.py
+──────────────────────
+Phase 3 & 4: Training Geometric MLP Models (M2 and M3).
 
-Both models share the same LandmarkMLP architecture (input 1404).
-Only the feature vector differs:
-  M2 → anchor-normalised 2D distances  [1404]
-  M3 → Procrustes-aligned 3D coords   [1404]
+Models:
+    M2: MLP trained on anchor-normalized 2D landmarks.
+    M3: MLP trained on Procrustes-aligned 3D landmarks.
+
+Focus:
+    Analyzing facial proportions, distance ratios, and structural geometry 
+    independently of image texture or lighting.
 
 Usage:
     python phase3_m2_landmarks.py          # runs M2 only
