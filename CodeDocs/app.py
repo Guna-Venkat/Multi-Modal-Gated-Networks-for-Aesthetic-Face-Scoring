@@ -176,7 +176,7 @@ def get_project_table():
 #  INTERFACE THEME & ASSEMBLY
 # ═══════════════════════════════════════════════════════════════════════════════
 
-with gr.Blocks(title="Facial Aesthetic Analytics", css="footer {visibility: hidden}") as demo:
+with gr.Blocks(title="Facial Aesthetic Analytics") as demo:
     gr.HTML("""
         <div style="text-align: center; padding: 30px; background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%); color: white; border-radius: 12px; margin-bottom: 25px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
             <h1 style="margin: 0; font-size: 2.5em; letter-spacing: 1px;">🧠 Facial Beauty Analytics Dashboard</h1>
@@ -252,5 +252,6 @@ if __name__ == "__main__":
     demo.launch(
         server_name="127.0.0.1", 
         server_port=7860,
-        theme=gr.themes.Default()
+        theme=gr.themes.Default(),
+        css="footer {visibility: hidden}"
     )
