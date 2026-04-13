@@ -28,6 +28,7 @@ import numpy as np
 import pandas as pd
 
 import config as C
+from phase7_evaluation import run_evaluation
 
 
 def main():
@@ -168,23 +169,22 @@ def main():
 
 if __name__ == "__main__":
     main()
-"] = metrics_m4
+#"] = metrics_m4
 
         # ── Quick summary ─────────────────────────────────────────────────────
-        print("\n" + "═"*55)
-        print("  QUICK SUMMARY")
-        print("═"*55)
-        rho_m1 = all_metrics.get("M1", {}).get("pearson_r", None)
-        for name, m in all_metrics.items():
-            contrib = f"  (contrib={m['pearson_r']/rho_m1:.3f})" if rho_m1 else ""
-            print(f"  {name:4s}  ρ={m['pearson_r']:.4f}  "
-                  f"MAE={m['mae']:.4f}  RMSE={m['rmse']:.4f}{contrib}")
+    print("\n" + "═"*55)
+    print("  QUICK SUMMARY")
+    print("═"*55)
+    rho_m1 = all_metrics.get("M1", {}).get("pearson_r", None)
+    for name, m in all_metrics.items():
+        contrib = f"  (contrib={m['pearson_r']/rho_m1:.3f})" if rho_m1 else ""
+        print(f"  {name:4s}  ρ={m['pearson_r']:.4f}  "
+                f"MAE={m['mae']:.4f}  RMSE={m['rmse']:.4f}{contrib}")
 
     # ══════════════════════════════════════════════════════════════════════════
     #  PHASE 6 – Evaluation & Visualisation
     # ══════════════════════════════════════════════════════════════════════════
     print("\n" + "─"*55)
-    from phase6_evaluation import run_evaluation
     run_evaluation(use_m3=args.include_m3)
 
     elapsed = time.time() - t_start

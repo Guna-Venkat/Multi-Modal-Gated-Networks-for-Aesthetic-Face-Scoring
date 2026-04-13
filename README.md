@@ -3,8 +3,21 @@
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![PyTorch](https://img.shields.io/badge/PyTorch-EE4C2C?logo=pytorch&logoColor=white)](https://pytorch.org/get-started/locally/)
 [![MediaPipe](https://img.shields.io/badge/MediaPipe-00bcd4?logo=google&logoColor=white)](https://google.github.io/mediapipe/)
+[![Hugging Face Space](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/Guna-Venkat-Doddi-251140009/facial-beauty-scoring)
 
 A deep learning project focused on **Facial Beauty Prediction** using a disentangled methodology that separates **texture** (pixel data) from **geometry** (landmark data). This project is part of Course project for Course **EE655: Computer Vision with Deep Learning** at IIT Kanpur. This repository implements eight distinct architectures, ranging from standard CNNs and MLPs to advanced Adaptive Gating Networks and Transformer-based Cross-Attention models.
+
+---
+
+## 🌐 Live Demo
+
+The project is deployed as an interactive **Facial Beauty Analytics Dashboard** on Hugging Face Spaces.
+
+[**Launch Live App on Hugging Face**](https://huggingface.co/spaces/Guna-Venkat-Doddi-251140009/facial-beauty-scoring)
+
+The dashboard provides two primary interfaces:
+*   **Research Insights**: Quantitative performance benchmarks (M1–M4) on the SCUT-FBP5500 dataset.
+*   **Face Beauty Lab**: An interactive tool to upload portraits and receive real-time aesthetic scores (1.0–5.0) along with saliency visualizations.
 
 ---
 
@@ -149,6 +162,9 @@ pip install gradio
 python CodeDocs/app.py
 ```
 Open the provided local URL (usually `http://127.0.0.1:7860`) in your browser. This demo allows you to upload images and visualize **gating weights** and **spatial attention maps** in real-time.
+
+> [!TIP]
+> **Prefer the Cloud?** You can access the same functional dashboard hosted on Hugging Face: [Facial Beauty Scoring Space](https://huggingface.co/spaces/Guna-Venkat-Doddi-251140009/facial-beauty-scoring).
 
 ### Running Specific Experiments (M5-M8)
 
