@@ -29,6 +29,12 @@ Uses ViT-B/16 patch tokens as keys/values and facial landmark tokens as queries.
 
 Using the 1,100-sample test set, we obtained the following consolidated results:
 
+<p align="center">
+  <img src="results/final_performance_comparison.png" width="800" alt="Figure 1: Performance Comparison">
+  <br>
+  <em>Figure 1: Performance Comparison across all models. Values on top indicate Pearson correlation in percentage format.</em>
+</p>
+
 ### Table 1: Performance Comparison
 | Model | Architecture | Pearson ρ ↑ | MAE ↓ | RMSE ↓ |
 |:---:|---|:---:|:---:|:---:|

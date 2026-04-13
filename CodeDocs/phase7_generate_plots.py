@@ -46,16 +46,25 @@ def generate_report_plots():
     # ------------------------------------------------------------------
     plt.figure(figsize=(10, 6))
     sns.set_style("whitegrid")
-    # Note: The FutureWarning about palette/hue is harmless and can be ignored.
-    sns.barplot(x="Model", y="Pearson ρ", data=df, palette="viridis")
+    
+    ax = sns.barplot(x="Model", y="Pearson ρ", data=df, palette="viridis")
     plt.title("Beauty Prediction Performance (Pearson Correlation)", fontsize=14)
     plt.ylim(min(df["Pearson ρ"]) * 0.9, 1.0)
     plt.xticks(rotation=45)
 
+    # Add labels on top of bars
+    for p in ax.patches:
+        ax.annotate(f'{p.get_height()*100:.1f}%', 
+                    (p.get_x() + p.get_width() / 2., p.get_height()), 
+                    ha='center', va='center', 
+                    xytext=(0, 9), 
+                    textcoords='offset points',
+                    fontsize=10, fontweight='bold')
+
     plot_path = os.path.join(C.RESULTS_DIR, "final_performance_comparison.png")
     plt.tight_layout()
     plt.savefig(plot_path)
-    print(f"Plot saved to {plot_path}")
+    print(f"Plot saved with labels to {plot_path}")
 
     # ------------------------------------------------------------------
     # 3. Histogram of gate weights β (geometry contribution in M4)
