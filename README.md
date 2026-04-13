@@ -54,17 +54,17 @@ By plotting the distribution of the $\beta$ (Geometry) gate, we observed that:
 We extracted cross-attention weights from the best-performing transformer model, **M7 (Cross-Attention Fusion)**. For each test image, the model computes a weight per facial landmark (0–467) indicating how much that landmark contributed to the final beauty score.
 
 <p align="center">
-  <img src="results/m7_attention_heatmap.png" width="800" alt="Figure 3: M7 cross-attention weights">
+  <img src="results/m7_attention_spatial.png" width="500" alt="Figure 3: M7 Spatial Attention Map">
   <br>
-  <em>Figure 3: M7 cross-attention weights per landmark for an example face. Higher values (peaks) indicate greater importance. The baseline weight (dashed line) is 1/468 ≈ 0.00214.</em>
+  <em>Figure 3: M7 Spatial Attention Map mapping feature importance back onto the face. Brighter points (Plasma scale) indicate higher attention weights.</em>
 </p>
 
-As shown in Figure 3, the attention weights vary substantially across the 468 landmarks. Peaks correspond to key facial regions:
+As shown in Figure 3, the attention weights are spatially concentrated on key facial regions:
 - **Eye regions** (indices 33–133): High attention confirms the importance of inter-ocular distance and symmetry.
 - **Lip region** (indices 61–78, 291–308): Vermilion border proportion is heavily weighted.
 - **Jawline** (indices 140–160, 360–380): Contributes to overall facial ovality assessment.
 
-Crucially, the weights are not uniform—the model learns to focus on a sparse set of geometrically meaningful landmarks rather than treating all points equally. This interpretability is a direct advantage of the cross-attention mechanism over standard MLP regressors.
+Crucially, the weights are non-uniform—the model learns to focus on a sparse set of geometrically meaningful landmarks rather than treating all points equally. By mapping these weights back to the facial structure, we can visually verify that the model's "intent" aligns with human aesthetic intuition.
 
 ---
 
@@ -129,7 +129,7 @@ For high-performance training on multi-GPU systems or Kaggle TPUs, refer to the 
 
 The key analytical visualizations are integrated directly into the **[Experimental Results](#-experimental-results)** section above:
 - **Figure 2**: Beta distribution of the gating network.
-- **Figure 3**: M7 cross-attention weights per landmark.
+- **Figure 3**: M7 spatial attention map (landmark importance).
 
 For a complete set of performance plots and pre-calculated predictions, refer to the `results/` folder.
 
