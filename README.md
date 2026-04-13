@@ -144,6 +144,6 @@ For a complete set of performance plots and pre-calculated predictions, refer to
 ---
 
 ## 🤝 Acknowledgements
-- **Dataset**: SCUT-FBP5500 Database.
+- **Dataset**: [SCUT-FBP5500 Database](https://github.com/HCIILAB/SCUT-FBP5500-Database-Release) (also available on [Kaggle](https://www.kaggle.com/datasets/pranavchandane/scut-fbp5500-v2-facial-beauty-scores)).
 - **Backbones**: Torchvision ResNet and ViT implementations.
-- **Landmarks**: Google MediaPipe Face Mesh.
+- **Landmarks**: [Google MediaPipe Face Mesh](https://google.github.io/mediapipe/solutions/face_mesh).
