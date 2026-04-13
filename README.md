@@ -141,6 +141,15 @@ The most convenient way to reproduce the results is via `run_all.py`:
 python CodeDocs/run_all.py --epochs-m1 30 --epochs-m4 40
 ```
 
+### Running the Scientific Demo (Interactive UI)
+To launch the interactive face analyzer (recommended for TAs and Professors):
+
+```bash
+pip install gradio
+python CodeDocs/app.py
+```
+Open the provided local URL (usually `http://127.0.0.1:7860`) in your browser. This demo allows you to upload images and visualize **gating weights** and **spatial attention maps** in real-time.
+
 ### Running Specific Experiments (M5-M8)
 
 To run the transformer-based experiments:

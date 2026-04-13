@@ -1,0 +1,11 @@
+gradio
+mediapipe
+torch
+torchvision
+matplotlib
+opencv-python
+pandas
+numpy
+scipy
+Pillow
+scikit-learn

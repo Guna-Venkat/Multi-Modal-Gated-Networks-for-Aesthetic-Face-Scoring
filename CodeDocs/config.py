@@ -122,23 +122,5 @@ def print_config():
     print(f"  CHECKPOINT_DIR : {CHECKPOINT_DIR}")
     print(f"  RESULTS_DIR    : {RESULTS_DIR}")
     print("=" * 60)
-n(RESULTS_DIR,    "m4_preds.npy")
+M4_PREDS_PATH   = os.path.join(RESULTS_DIR,    "m4_preds.npy")
 M4_GATES_PATH   = os.path.join(RESULTS_DIR,    "m4_gates.npy")  # (alpha, beta) per sample
-
-# ── Device ───────────────────────────────────
-import torch
-DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
-
-# ── Verbosity ────────────────────────────────
-VERBOSE = True
-
-def print_config():
-    print("=" * 55)
-    print(f"  ENV            : {ENV}")
-    print(f"  DEVICE         : {DEVICE}")
-    print(f"  IMAGE_DIR      : {IMAGE_DIR}")
-    print(f"  LABEL_CSV      : {LABEL_CSV}")
-    print(f"  CACHE_DIR      : {CACHE_DIR}")
-    print(f"  CHECKPOINT_DIR : {CHECKPOINT_DIR}")
-    print(f"  RESULTS_DIR    : {RESULTS_DIR}")
-    print("=" * 55)

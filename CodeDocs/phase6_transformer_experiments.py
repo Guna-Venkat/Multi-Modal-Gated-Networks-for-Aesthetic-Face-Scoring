@@ -50,9 +50,9 @@ import torch.optim as optim
 import torchvision.models as tv_models
 
 # Internal imports from the CodeDocs package
-from CodeDocs import config as C
-from CodeDocs.datasets import get_image_loaders, get_landmark_loaders, get_fusion_loaders
-from CodeDocs.trainer import EarlyStopping, compute_metrics, save_checkpoint, fit_fusion
+import config as C
+from datasets import get_image_loaders, get_landmark_loaders, get_fusion_loaders
+from trainer import EarlyStopping, compute_metrics, save_checkpoint, fit_fusion
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
